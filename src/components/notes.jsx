@@ -4,8 +4,12 @@ import Note from "./note"
 
 function Notes({notes, setNotes}) {
     useEffect(() => {
+		// find notes in localhost
         let savedNotes = JSON.parse(localStorage.getItem("notes")) || []
+
+		// initially give all node to new position
         let updateNotes = notes.map((note) => {
+			// if notes is save in local host then take saved postion
             const savedNote = savedNotes.find((n) => n.id == note.id)
             if (savedNote) {
                 return {...note, position: savedNote.position}
@@ -15,12 +19,12 @@ function Notes({notes, setNotes}) {
             }
         })
 
+		// update notes postion
         setNotes(updateNotes)
         localStorage.setItem("notes", JSON.stringify(updateNotes))
     }, [notes.length])
 
-    // const notesRefs = useRef([])
-    const notesRefs = []
+    const notesRefs = useRef([])
 
     function determineNewPosition() {
         let maxX = window.innerWidth - 250
@@ -34,8 +38,8 @@ function Notes({notes, setNotes}) {
 
 	function handleDragStart(e , note){
 		const note_id = note.id
-		// const noteRef = notesRefs.current[note_id].current
-		const noteRef = notesRefs[note_id].current
+		const noteRef = notesRefs.current[note_id].current
+		// get DOMreact object give size and position informaton
 		const rect = noteRef.getBoundingClientRect();
 		// clientX meand user cursor x position
 		const offsetX = e.clientX - rect.left
@@ -66,14 +70,13 @@ function Notes({notes, setNotes}) {
 		}
 
 		const checkForOverLap = (note_id)=>{
-			// const currentNoteRef = notesRefs.current[note_id].current
-			const currentNoteRef = notesRefs[note_id].current
+			const currentNoteRef = notesRefs.current[note_id].current
 			const currentRect = currentNoteRef.getBoundingClientRect();
 
 			return notes.some((note)=>{
 				if(note.id == note_id ) return false
 
-				const otherNoteRef = notesRefs[note.id].current
+				const otherNoteRef = notesRefs.current[note.id].current
 				const otherRect = otherNoteRef.getBoundingClientRect();
 
 				let overlap = !(
@@ -101,12 +104,9 @@ function Notes({notes, setNotes}) {
         <div>
             {notes.map((note) => {
                 return <Note key={note.id} 
-							ref={notesRefs[note.id] ? 
-									notesRefs[note.id] : 
-									(notesRefs[note.id] = createRef())} 
-							// ref={notesRefs.current[note.id] ? 
-							// 		notesRefs.current[note.id] : 
-							// 		(notesRefs.current[note.id] = createRef())} 
+							ref={notesRefs.current[note.id] ? 
+									notesRefs.current[note.id] : 
+									(notesRefs.current[note.id] = createRef())} 
 							initialPos={note.position} content={note.text}
 							onMouseDown = {(e)=>handleDragStart(e , note)}
 						/>
